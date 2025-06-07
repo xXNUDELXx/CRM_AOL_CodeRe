@@ -22,21 +22,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new SpringDataUserDetailsService();
 	}
 
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception { 
-		http.csrf().disable()
-		.authorizeRequests()
-		.antMatchers("/").hasAnyRole("ADMIN","OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/client/**").hasAnyRole("OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/contract/**").hasAnyRole("OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/employeeSearch/**").hasAnyRole("OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/managerSearch/**").hasAnyRole("OWNER","MANAGER")
-		.antMatchers("/event/**").hasAnyRole("OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/import/**").hasAnyRole("OWNER","EMPLOYEE","MANAGER")
-		.antMatchers("/admin/**").hasRole("ADMIN")
-		.anyRequest().permitAll()
-		.and().formLogin()
-		.and().httpBasic();
-	}
+@Override
+protected void configure(HttpSecurity http) throws Exception {
+    http.csrf().disable()
+        .authorizeRequests()
+        .antMatchers("/").hasAnyRole(getAllRoles())
+        .antMatchers("/client/**", "/contract/**", "/event/**", "/import/**", "/employeeSearch/**")
+        .hasAnyRole("OWNER", "EMPLOYEE", "MANAGER")
+        .antMatchers("/managerSearch/**").hasAnyRole("OWNER", "MANAGER")
+        .antMatchers("/admin/**").hasRole("ADMIN")
+        .anyRequest().permitAll()
+        .and().formLogin()
+        .and().httpBasic();
 }
+
+private String[] getAllRoles() {
+    return new String[]{"ADMIN", "OWNER", "EMPLOYEE", "MANAGER"};
+}
+
