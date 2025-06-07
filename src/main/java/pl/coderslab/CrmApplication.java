@@ -24,28 +24,22 @@ public class CrmApplication implements AsyncConfigurer, SchedulingConfigurer{
 		SpringApplication.run(CrmApplication.class, args);
 	}
 	
+@Override
+public Executor getAsyncExecutor() {
+    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    taskExecutor.setMaxPoolSize(10);
+    taskExecutor.setThreadNamePrefix("CustomExecutor-");
+    taskExecutor.initialize();
+    return taskExecutor;
+}
 
-	@Override
-	public Executor getAsyncExecutor() {
-		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-	    taskExecutor.setMaxPoolSize(10);
-	    taskExecutor.setThreadNamePrefix("CustomExecutor-");
-	    taskExecutor.initialize();
-	    return taskExecutor;
-	}
+@Override
+public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(10);
+    scheduler.setThreadNamePrefix("my-scheduled-task-pool-");
+    scheduler.initialize();
+    taskRegistrar.setTaskScheduler(scheduler);
+}
 
-	@Override
-	public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-		return new SimpleAsyncUncaughtExceptionHandler();
-	}
-
-
-	@Override
-	public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-		ThreadPoolTaskScheduler thPoolTaskScheduler = new ThreadPoolTaskScheduler();
-	    thPoolTaskScheduler.setPoolSize(10);
-	    thPoolTaskScheduler.setThreadNamePrefix("my-scheduled-task-pool-");
-	    thPoolTaskScheduler.initialize();
-	    taskRegistrar.setTaskScheduler(thPoolTaskScheduler);
-	}
 }
