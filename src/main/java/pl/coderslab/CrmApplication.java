@@ -17,13 +17,13 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 @EnableAsync
 @EnableScheduling
 @SpringBootApplication
-public class CrmApplication implements AsyncConfigurer, SchedulingConfigurer{
+@SpringBootApplication
+public class CrmApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(CrmApplication.class, args);
+    }
+}
 
-	
-	public static void main(String[] args) {
-		SpringApplication.run(CrmApplication.class, args);
-	}
-	
 @Override
 public Executor getAsyncExecutor() {
     ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
