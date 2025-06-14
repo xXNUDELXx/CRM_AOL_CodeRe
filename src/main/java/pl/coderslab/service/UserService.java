@@ -39,4 +39,19 @@ public interface UserService {
 	 */
 	Double getMaxContractValue(User user);
 
+	public UserDetails loadUserDetailsByEmail(String email) {
+    User user = findByEmail(email);
+    if (user == null) {
+        throw new UsernameNotFoundException(email);
+    }
+
+    Set<GrantedAuthority> grantedAuthorities = user.getRoles().stream()
+        .map(role -> new SimpleGrantedAuthority(role.getName()))
+        .collect(Collectors.toSet());
+
+    return new org.springframework.security.core.userdetails.User(
+        user.getEmail(), user.getPassword(), grantedAuthorities);
+}
+
+
 }
