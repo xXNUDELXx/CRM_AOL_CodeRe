@@ -36,39 +36,41 @@ public class NotificationService {
 	 *
 	 */
 	@Scheduled(cron = "0 */5 9-17 * * MON-FRI")
-	public void checkIfGenerateNotification() {
+public void checkIfGenerateNotification() {
+    for (Iterator<Event> iterator = todayEventList.iterator(); iterator.hasNext(); ) {
+        Event event = iterator.next();
 
-		for (Event event : todayEventList) {
-			// delete event from list if it's in the past
-			if (LocalDateTime.now().isAfter(event.getTime())) {
-				
-				List<Notification> list = notificationRepository.findByEvent(event);
-				for (Notification n : list) {
-					notificationRepository.delete(n);
-				}
-				todayEventList.remove(event);
+        if (isEventInPast(event)) {
+            deleteNotificationsForEvent(event);
+            iterator.remove();
+        } else if (shouldNotifyOneHourBefore(event)) {
+            generateNotification(event);
+        } else if (shouldNotifyTwoHoursBefore(event)) {
+            generateNotification(event);
+        }
+    }
+}
 
-			// generate notification if event is in 1 hour
-			} else if (LocalDateTime.now().plusHours(1).isAfter(event.getTime())) {
-				Notification notification = notificationRepository.findFirstByEventOrderByCreatedDesc(event);
-				List<Notification> notificationList = notificationRepository.findByEvent(event);
-				if (notificationList.size() < 3) {
+private boolean isEventInPast(Event event) {
+    return LocalDateTime.now().isAfter(event.getTime());
+}
 
-					this.generateNotification(event);
-				}
-			// generate notification if event is in 2 hours
-			} else if (LocalDateTime.now().plusHours(2).isAfter(event.getTime())) {
-				Notification notification = notificationRepository.findFirstByEventOrderByCreatedDesc(event);
-				List<Notification> notificationList = notificationRepository.findByEvent(event);
-				if (notificationList.size() < 2) {
+private void deleteNotificationsForEvent(Event event) {
+    List<Notification> list = notificationRepository.findByEvent(event);
+    for (Notification n : list) {
+        notificationRepository.delete(n);
+    }
+}
 
-					this.generateNotification(event);
-				}
-			}
+private boolean shouldNotifyOneHourBefore(Event event) {
+    List<Notification> notificationList = notificationRepository.findByEvent(event);
+    return LocalDateTime.now().plusHours(1).isAfter(event.getTime()) && notificationList.size() < 3;
+}
 
-		}
-
-	}
+private boolean shouldNotifyTwoHoursBefore(Event event) {
+    List<Notification> notificationList = notificationRepository.findByEvent(event);
+    return LocalDateTime.now().plusHours(2).isAfter(event.getTime()) && notificationList.size() < 2;
+}
 
 	
 	/**Gets list of today's events at 8.30 from Monday to Friday 
