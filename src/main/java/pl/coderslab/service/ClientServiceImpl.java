@@ -56,18 +56,23 @@ public class ClientServiceImpl implements ClientService {
 	}
 
 	@Override
-	public Long saveClientWithLoggedUser(Client client) {
-		User user = authenticationFacade.getAuthenticatedUser();
-		client.setUser(user);
-		client.setCreated(LocalDateTime.now());
-		clientRepository.save(client);
-		return client.getId();
-	}
-	@Override
 	public Long saveClient(Client client) {
-		client.setCreated(LocalDateTime.now());
-		clientRepository.save(client);
-		return client.getId();
+ 	   return saveClientInternal(client, false);
+	}
+
+	@Override
+	public Long saveClientWithLoggedUser(Client client) {
+ 	   return saveClientInternal(client, true);
+	}
+
+	private Long saveClientInternal(Client client, boolean withUser) {
+  	  if (withUser) {
+        User user = authenticationFacade.getAuthenticatedUser();
+        client.setUser(user);
+   	 }
+    	client.setCreated(LocalDateTime.now());
+   	 clientRepository.save(client);
+ 	   return client.getId();
 	}
 
 
